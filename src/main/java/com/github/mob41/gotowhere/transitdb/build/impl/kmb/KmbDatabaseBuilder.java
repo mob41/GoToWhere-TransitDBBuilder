@@ -44,7 +44,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 		    
 		    if (raw.length != 1) {
 				reportMessage("Error!");
-		    	System.err.println("Error: Received routes JSON array is not holding one JSON. " + raw.length + " found.");
+		    	System.err.println("\rError: Received routes JSON array is not holding one JSON. " + raw.length + " found.");
 		    	return false;
 		    }
 		    
@@ -52,7 +52,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 		    
 		    if (rno == null) {
 				reportMessage("Error!");
-		    	System.err.println("Error: Received routes JSON does not contain \"r_no\" parameter.");
+		    	System.err.println("\rError: Received routes JSON does not contain \"r_no\" parameter.");
 		    	return false;
 		    }
 		    
@@ -63,7 +63,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	    
 	    if (routes == null || routes.length == 0) {
 			reportMessage("Error!");
-	    	System.err.println("Error: No routes received. Routes is null or with zero length.");
+	    	System.err.println("\rError: No routes received. Routes is null or with zero length.");
 	    	return false;
 	    }
 
@@ -83,7 +83,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	    		stops = searchRoute(routes[i], j);
 	    		if (stops == null) {
 	    			if (j == 1) {
-	    				System.err.println("Warning: No bound data received for " + routes[i]);
+	    				System.err.println("\rWarning: No bound data received for " + routes[i]);
 	    			}
 	    			break;
 	    		}
@@ -125,7 +125,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	    }
     	reportMessage("Done!");
 	    
-		return false;
+		return true;
 	}
 	
 	private KmbStop[] searchRoute(String bn, int dir) throws Exception{
@@ -147,7 +147,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 			        data += line;
 			     }
 		    } catch (Exception e){
-		    	System.err.println("Error: Read error. Auto-recovering. Repeating the same request in 10 seconds.");
+		    	System.err.println("\rError: Read error. Auto-recovering. Repeating the same request in 10 seconds.");
 		    	Thread.sleep(10000);
 		    	return searchRoute(bn, dir);
 		    }
@@ -164,7 +164,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 		    
 		    return gson.fromJson(data, KmbStop[].class);
 		} catch (Exception e){
-	    	System.err.println("Error: Connection error. Auto-recovering. Repeating the same request in 10 seconds.");
+	    	System.err.println("\rError: Connection error. Auto-recovering. Repeating the same request in 10 seconds.");
 	    	Thread.sleep(10000);
 	    	return searchRoute(bn, dir);
 		}
