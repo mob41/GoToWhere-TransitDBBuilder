@@ -95,6 +95,8 @@ public class Main {
 				builder.deleteObservers();
 				builder.addObserver(new ConsoleObserver(builder.getProviderName(), builder));
 				
+				builder.cleanUp();
+				
 				long startTime = System.currentTimeMillis();
 			    boolean status = false;
 				try {
@@ -106,7 +108,7 @@ public class Main {
 				}
 				
 				if (status) {
-					System.out.println("Database build success. Used " + (System.currentTimeMillis() - startTime) + " ms");
+					System.out.println("\rDatabase build success. Used " + (System.currentTimeMillis() - startTime) + " ms\t");
 					
 					System.out.print("Generating structure... ");
 					TransitDatabase db = builder.create();
@@ -147,7 +149,7 @@ public class Main {
 					}
 					
 					int dotIndex = fileName.lastIndexOf('.');
-					String versionFileName = fileName.substring(dotIndex + 1) + "-version.json";
+					String versionFileName = fileName.substring(0, dotIndex) + "-version.json";
 
 					System.out.print("Outputting database file as \"" + fileName + "\"... ");
 					try {

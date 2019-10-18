@@ -1,6 +1,8 @@
 package com.github.mob41.gotowhere.transitdb.db;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -54,13 +56,23 @@ public class TransitDatabase {
 	}
 	
 	public Map<String, Object> getDatabaseMap(){
+		List<Map<String, Object>> routeMaps = new ArrayList<Map<String, Object>>();
+		for (int i = 0; i < routes.length; i++) {
+			routeMaps.add(routes[i].getMap());
+		}
+		
+		List<Map<String, Object>> stopMaps = new ArrayList<Map<String, Object>>();
+		for (int i = 0; i < stops.length; i++) {
+			routeMaps.add(stops[i].getMap());
+		}
+		
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("transit", transitType.toString());
 		map.put("provider", providerName);
 		map.put("generated", generated);
 		map.put("version", version);
-		map.put("routes", routes);
-		map.put("paths", stops);
+		map.put("routes", routeMaps);
+		map.put("stops", stopMaps);
 		return map;
 	}
 	

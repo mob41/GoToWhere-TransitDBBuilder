@@ -32,6 +32,13 @@ public abstract class TransitDatabaseBuilder extends Observable{
 		progress = 0;
 		msg = null;
 	}
+	
+	public final void cleanUp() {
+		routes.clear();
+		stops.clear();
+		progress = 0;
+		msg = null;
+	}
 
 	public abstract boolean build() throws Exception;
 	

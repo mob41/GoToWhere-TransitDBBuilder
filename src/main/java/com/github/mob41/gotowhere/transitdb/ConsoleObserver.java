@@ -29,8 +29,19 @@ public class ConsoleObserver implements Observer {
 			text += " :: " + msg;
 		}
 		
-		if (lastMessage != null && msg.length() < lastMessage.length()) {
-			text += spaces(lastMessage.length() - msg.length() + 4);
+		if (lastMessage != null) {
+			int c = 0;
+			if (msg != null) {
+				if (msg.length() < lastMessage.length()) {
+					c = lastMessage.length() - msg.length();
+				}
+			} else {
+				c = 4;
+			}
+			
+			if (c > 0) {
+				text += spaces(c);
+			}
 		}
 		lastMessage = msg;
 		

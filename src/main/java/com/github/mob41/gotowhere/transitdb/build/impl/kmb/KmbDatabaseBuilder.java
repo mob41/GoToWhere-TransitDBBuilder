@@ -76,14 +76,14 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	    String[][] paths;
 	    List<String[]> bounds;
 	    for (int i = 0; i < routes.length; i++) {
-	    	reportMessage((i + 1) +  ": " + routes[i]);
+	    	reportMessage("Fetching " + (i + 1) + "/" + routes.length + ": " + routes[i]);
 	    	
 	    	bounds = new ArrayList<String[]>();
 	    	for (int j = 1; j <= 2; j++) {
 	    		stops = searchRoute(routes[i], j);
 	    		if (stops == null) {
 	    			if (j == 1) {
-	    				System.err.println("\rWarning: No bound data received for " + routes[i]);
+	    				System.err.println("\rWarning: No bound data received for " + routes[i] + "\t\t\t\t");
 	    			}
 	    			break;
 	    		}
