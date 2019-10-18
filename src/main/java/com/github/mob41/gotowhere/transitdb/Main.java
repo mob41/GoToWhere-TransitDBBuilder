@@ -2,7 +2,9 @@ package com.github.mob41.gotowhere.transitdb;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
@@ -47,7 +49,7 @@ public class Main {
 				System.out.println("\thelp - Shows this help message.");
 				System.out.println("\tlist - Lists all the available builders.");
 				System.out.println("\tbuild - Uses the specified builder to build a transit database.");
-				System.out.println("\t\tUsage: build <{builderName}|{index}> [{fileName}] [b64|json]");
+				System.out.println("\t\tUsage: build <{builderName}|{index}> [json|b64] [{fileName}]");
 				System.out.println("\texit - Terminates the application.\n");
 				System.out.println("<>: Required []: Optional |: Or {}: Replace with input");
 			} else if (input.startsWith("list")) {
@@ -60,7 +62,7 @@ public class Main {
 				
 				if (splits.length < 2) {
 					System.out.println("Error: The correct usage of \"build\" is:");
-					System.out.println("\tbuild <{builderName}|{index}> [{fileName}] [b64|json]");
+					System.out.println("\tbuild <{builderName}|{index}> [json|b64] [{fileName}]");
 					continue;
 				}
 				
@@ -87,9 +89,9 @@ public class Main {
 					continue;
 				}
 				
-			    boolean encodeBase64 = true;
-			    if (splits.length >= 4 && "json".equals(splits[3])) {
-		    		encodeBase64 = false;
+			    boolean encodeBase64 = false;
+			    if (splits.length >= 3 && "b64".equals(splits[2])) {
+		    		encodeBase64 = true;
 			    }
 			    
 				builder.deleteObservers();
@@ -124,7 +126,7 @@ public class Main {
 					String output;
 					if (encodeBase64) {
 						System.out.print("Encoding database JSON in Base64... ");
-						output = Base64.encodeBase64String(dbJson.getBytes(Charsets.UTF_8));
+						output = Base64.encodeBase64String(dbJson.getBytes(StandardCharsets.UTF_8));
 						System.out.println("done");
 					} else {
 						System.out.println("Keeping it as JSON format.");
@@ -132,8 +134,8 @@ public class Main {
 					}
 					
 					String fileName;
-					if (splits.length >= 3) {
-						fileName = splits[2];
+					if (splits.length >= 4) {
+						fileName = splits[3];
 					} else {
 						fileName = builder.getProviderName() + "-" + System.currentTimeMillis();
 					}
@@ -162,7 +164,7 @@ public class Main {
 						}
 						
 						FileOutputStream out = new FileOutputStream(file);
-						PrintWriter writer = new PrintWriter(out, true);
+						PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
 						writer.println(output);
 						writer.flush();
 						writer.close();
