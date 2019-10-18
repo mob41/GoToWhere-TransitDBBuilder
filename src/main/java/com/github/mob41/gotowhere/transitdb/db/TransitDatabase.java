@@ -63,7 +63,7 @@ public class TransitDatabase {
 		
 		List<Map<String, Object>> stopMaps = new ArrayList<Map<String, Object>>();
 		for (int i = 0; i < stops.length; i++) {
-			routeMaps.add(stops[i].getMap());
+			stopMaps.add(stops[i].getMap());
 		}
 		
 		Map<String, Object> map = new HashMap<String, Object>();
