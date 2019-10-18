@@ -12,9 +12,9 @@ import com.github.mob41.gotowhere.transitdb.db.TransitType;
 
 public abstract class TransitDatabaseBuilder extends Observable{
 
-	private final TransitType transitType;
+	public final TransitType transitType;
 	
-	private final String providerName;
+	public final String providerName;
 	
 	private final List<TransitRoute> routes;
 	
@@ -22,17 +22,20 @@ public abstract class TransitDatabaseBuilder extends Observable{
 	
 	private int progress;
 	
+	private String msg;
+	
 	public TransitDatabaseBuilder(TransitType transitType, String providerName) {
 		this.transitType = transitType;
 		this.providerName = providerName;
 		routes = new ArrayList<TransitRoute>();
 		stops = new ArrayList<TransitStop>();
 		progress = 0;
+		msg = null;
 	}
 
-	public abstract boolean build();
+	public abstract boolean build() throws Exception;
 	
-	public abstract String generateVersion(Calendar cal, TransitRoute[] routes, TransitStop[] stops);
+	public abstract String generateVersion(long currentTimeMs, TransitRoute[] routes, TransitStop[] stops);
 	
 	public final void reportProgress(int progress) {
 		this.progress = progress;
@@ -56,8 +59,18 @@ public abstract class TransitDatabaseBuilder extends Observable{
 		return providerName;
 	}
 
-	public int getProgress() {
+	public final int getProgress() {
 		return progress;
+	}
+	
+	public final void reportMessage(String msg) {
+		this.msg = msg;
+		this.setChanged();
+		this.notifyObservers();
+	}
+	
+	public final String getMessage() {
+		return msg;
 	}
 	
 	public TransitDatabase create() {
@@ -71,9 +84,9 @@ public abstract class TransitDatabaseBuilder extends Observable{
 			outStops[i] = stops.get(i);
 		}
 		
-		Calendar cal = Calendar.getInstance();
+		long currentTimeMs = System.currentTimeMillis();
 		
-		TransitDatabase inst = new TransitDatabase(transitType, providerName, generateVersion(cal, outRoutes, outStops), cal.getTimeInMillis(), outRoutes, outStops);
+		TransitDatabase inst = new TransitDatabase(transitType, providerName, generateVersion(currentTimeMs, outRoutes, outStops), currentTimeMs, outRoutes, outStops);
 		return inst;
 	}
 	
