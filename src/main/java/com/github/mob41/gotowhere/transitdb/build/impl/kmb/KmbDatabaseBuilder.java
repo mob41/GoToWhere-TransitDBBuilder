@@ -1,14 +1,19 @@
 package com.github.mob41.gotowhere.transitdb.build.impl.kmb;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.mob41.gotowhere.transitdb.Console;
 import com.github.mob41.gotowhere.transitdb.build.TransitDatabaseBuilder;
 import com.github.mob41.gotowhere.transitdb.db.AddressKey;
 import com.github.mob41.gotowhere.transitdb.db.StopNameKey;
@@ -24,6 +29,8 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	private static final String ROUTE_SEARCH_URL = "http://www.kmb.hk/ajax/getRouteMapByBusno.php";
 	
 	private Gson gson;
+	
+	private int reqCount;
 
 	public KmbDatabaseBuilder() {
 		super(TransitType.TRANSIT_BUS, "KMB");
@@ -33,18 +40,33 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	@Override
 	public boolean build() throws Exception {
 		reportMessage("Downloading list of routes...");
-		
-		URL url = new URL(ROUTES_URL);
-	    URLConnection conn = url.openConnection();
 	    
+	    reqCount = 0;
+	    String fileKey;
+	    PrintWriter fileWriter;
+	    FileOutputStream fileOut;
+	    FileInputStream fileIn;
+	    InputStream in;
 	    String[] routes = null;
 	    try {
-	    	BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+		    fileKey = "KMB-route-response.json";
+		    fileIn = readDownloaded(fileKey);
+		    if (fileIn == null) {
+				reqCount++;
+				URL url = new URL(ROUTES_URL);
+			    URLConnection conn = url.openConnection();
+		    	in = conn.getInputStream();
+		    } else {
+		    	in = fileIn;
+		    }
+		    
+	    	BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 		    KmbRoutes[] raw = gson.fromJson(reader, KmbRoutes[].class);
+		    reader.close();
 		    
 		    if (raw.length != 1) {
 				reportMessage("Error!");
-		    	System.err.println("\rError: Received routes JSON array is not holding one JSON. " + raw.length + " found.");
+		    	Console.println("Error: Received routes JSON array is not holding one JSON. " + raw.length + " found.");
 		    	return false;
 		    }
 		    
@@ -52,9 +74,16 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 		    
 		    if (rno == null) {
 				reportMessage("Error!");
-		    	System.err.println("\rError: Received routes JSON does not contain \"r_no\" parameter.");
+		    	Console.println("Error: Received routes JSON does not contain \"r_no\" parameter.");
 		    	return false;
 		    }
+		    
+		    fileOut = writeDownloaded(fileKey);
+			fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
+			fileWriter.println(gson.toJson(raw));
+			fileWriter.flush();
+			fileWriter.close();
+			fileOut.close();
 		    
 		    routes = rno.split(",");
 	    } catch (Exception e){
@@ -63,7 +92,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	    
 	    if (routes == null || routes.length == 0) {
 			reportMessage("Error!");
-	    	System.err.println("\rError: No routes received. Routes is null or with zero length.");
+	    	Console.println("Error: No routes received. Routes is null or with zero length.");
 	    	return false;
 	    }
 
@@ -83,7 +112,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	    		stops = searchRoute(routes[i], j);
 	    		if (stops == null) {
 	    			if (j == 1) {
-	    				System.err.println("\rWarning: No bound data received for " + routes[i] + "\t\t\t\t");
+	    				Console.println("Warning: No bound data received for " + routes[i] + "\t\t\t\t");
 	    			}
 	    			break;
 	    		}
@@ -124,30 +153,41 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	    	reportProgress((int) ((i + 1) / (float) routes.length * 100.0));
 	    }
     	reportMessage("Done!");
+    	Console.println(reqCount + " request(s) have been made.");
 	    
 		return true;
 	}
 	
 	private KmbStop[] searchRoute(String bn, int dir) throws Exception{
 		try {
-			URL url = new URL(ROUTE_SEARCH_URL);
-		    URLConnection conn = url.openConnection();
-		    conn.setDoOutput(true);
+			InputStream in;
+		    String fileKey = "KMB-" + bn + "-" + dir + "-response.txt";
+		    FileInputStream fileIn = readDownloaded(fileKey);
+		    if (fileIn == null) {
+				reqCount++;
+				URL url = new URL(ROUTE_SEARCH_URL);
+			    URLConnection conn = url.openConnection();
+			    conn.setDoOutput(true);
 
-		    OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+			    OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
 
-		    writer.write("bn=" + bn + "&dir=" + dir);
-		    writer.flush();
+			    writer.write("bn=" + bn + "&dir=" + dir);
+			    writer.flush();
+		    	in = conn.getInputStream();
+		    } else {
+		    	in = fileIn;
+		    }
+		    
 		    String line;
 		    String data = "";
 		    try {
 		    	BufferedReader reader = new BufferedReader(new 
-		                InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+		                InputStreamReader(in, StandardCharsets.UTF_8));
 			    while ((line = reader.readLine()) != null) {
 			        data += line;
 			     }
 		    } catch (Exception e){
-		    	System.err.println("\rError: Read error. Auto-recovering. Repeating the same request in 10 seconds.");
+		    	Console.println("Error: Read error. Auto-recovering. Repeating the same request in 10 seconds.");
 		    	Thread.sleep(10000);
 		    	return searchRoute(bn, dir);
 		    }
@@ -156,15 +196,22 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 		    	return null;
 		    }
 		    
-		    data = "[" + data.substring(2, data.length() - 2) + "]";
+		    String newData = "[" + data.substring(2, data.length() - 2) + "]";
 		    
-		    if (data.equals("[]")){
+		    if (newData.equals("[]")){
 		    	return null;
 		    }
 		    
-		    return gson.fromJson(data, KmbStop[].class);
+		    FileOutputStream fileOut = writeDownloaded(fileKey);
+			PrintWriter fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
+			fileWriter.println(data);
+			fileWriter.flush();
+			fileWriter.close();
+			fileOut.close();
+		    
+		    return gson.fromJson(newData, KmbStop[].class);
 		} catch (Exception e){
-	    	System.err.println("\rError: Connection error. Auto-recovering. Repeating the same request in 10 seconds.");
+	    	Console.println("Error: Connection error. Auto-recovering. Repeating the same request in 10 seconds.");
 	    	Thread.sleep(10000);
 	    	return searchRoute(bn, dir);
 		}

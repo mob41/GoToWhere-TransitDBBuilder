@@ -34,38 +34,14 @@ public class ConsoleObserver implements Observer {
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		String text = "\r" + spinner() + "  Building \"" + builderName + "\" database... " + builder.getProgress() + "%";
+		String text = spinner() + "  Building \"" + builderName + "\" database... " + builder.getProgress() + "%";
 		
 		String msg = builder.getMessage();
 		if (msg != null) {
 			text += " :: " + msg;
 		}
 		
-		if (lastMessage != null) {
-			int c = 0;
-			if (msg != null) {
-				if (msg.length() < lastMessage.length()) {
-					c = lastMessage.length() - msg.length();
-				}
-			} else {
-				c = 4;
-			}
-			
-			if (c > 0) {
-				text += spaces(c);
-			}
-		}
-		lastMessage = msg;
-		
-		System.out.print(text);
-	}
-	
-	public static String spaces(int c) {
-		String text = "";
-		for (int i = 0; i < c; i++) {
-			text += " ";
-		}
-		return text;
+		Console.sameLine(text);
 	}
 
 }

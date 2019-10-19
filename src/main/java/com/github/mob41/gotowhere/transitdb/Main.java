@@ -5,14 +5,28 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.security.cert.X509Certificate;
+
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.binary.Base64;
 
+import com.github.mob41.gotowhere.transitdb.build.DownloadedInfo;
 import com.github.mob41.gotowhere.transitdb.build.TransitDatabaseBuilder;
+import com.github.mob41.gotowhere.transitdb.build.impl.ctbnwfb.CtbNwfbDatabaseBuilder;
 import com.github.mob41.gotowhere.transitdb.build.impl.kmb.KmbDatabaseBuilder;
 import com.github.mob41.gotowhere.transitdb.db.TransitDatabase;
 
@@ -23,7 +37,8 @@ public class Main {
 	public static void main(String[] args) {
 		//Put implementation instances here
 		TransitDatabaseBuilder[] builders = {
-			new KmbDatabaseBuilder()
+			new KmbDatabaseBuilder(),
+			new CtbNwfbDatabaseBuilder()
 		};
 		
 		System.out.println("GoToWhere TransitDBBuilder v" + VERSION);
@@ -34,6 +49,11 @@ public class Main {
 		System.out.println("There are total of " + builders.length + " builders available.");
 		System.out.println("Type \"list\" to show all of the available DB builders.");
 		System.out.println("Type \"exit\" to terminate the application.\n");
+		
+		if (args.length > 0 && args[0].equals("--trust-all-ssl")) {
+			System.out.println("Trusting all insecure SSL!\n");
+			trustAllSsl();
+		}
 		
 		String input;
 		Scanner scanner = new Scanner(System.in);
@@ -94,6 +114,43 @@ public class Main {
 		    		encodeBase64 = true;
 			    }
 			    
+			    DownloadedInfo[] infos = builder.getAvailableDownloaded();
+			    if (infos.length > 0) {
+			    	System.out.println("There are existing database downloads. You can choose to use these downloads:\n");
+			    	System.out.println("[0]\tDownload a new copy");
+			    	SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
+			    	Date date;
+			    	for (int i = 0; i < infos.length; i++) {
+			    		date = new Date(infos[i].getTimeMs());
+			    		System.out.println("[" + (i + 1) + "]\t" + simpleDateFormat.format(date));
+			    	}
+			    	int inputIndex;
+			    	System.out.println("\nPlease input from 0 to " + infos.length + ".");
+			    	while (true) {
+			    		inputIndex = -1;
+			    		
+			    		System.out.print("[0-" + infos.length + "]>");
+			    		input = scanner.nextLine();
+			    		try {
+			    			inputIndex = Integer.parseInt(input);
+			    		} catch (NumberFormatException e) {}
+			    		
+			    		if (inputIndex == -1 || inputIndex < 0 || inputIndex > infos.length) {
+			    			System.out.println("Invalid input. Please input a number from 0 to " + infos.length + ".");
+			    		} else {
+			    			break;
+			    		}
+			    	}
+			    	
+			    	if (inputIndex == 0) {
+			    		System.out.println("\nA new copy of the data will be downloaded.");
+			    	} else {
+			    		DownloadedInfo info = infos[inputIndex - 1];
+			    		builder.setDownloadedKey(info.getDownloadedKey());
+				    	System.out.println("\nThe copy at " + simpleDateFormat.format(new Date(info.getTimeMs())) + " will be used.\n");
+			    	}
+			    }
+			    
 				builder.deleteObservers();
 				builder.addObserver(new ConsoleObserver(builder.getProviderName(), builder));
 				
@@ -104,6 +161,7 @@ public class Main {
 				try {
 					status = builder.build();
 				} catch (Exception e) {
+					System.out.println("");
 					e.printStackTrace();
 					System.err.println("Error: Error occurred. Aborting current operation");
 					continue;
@@ -206,6 +264,40 @@ public class Main {
 			} else {
 				System.out.println("Unknown command. Type \"help\" for a list of available commands.");
 			}
+		}
+	}
+	
+	private static void trustAllSsl() {
+		try {
+
+			/* Start of Fix */
+	        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+	            public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+	            public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+	            public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+				@Override
+				public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType)
+						throws CertificateException {}
+				@Override
+				public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
+						throws CertificateException {}
+
+	        } };
+
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+	        // Create all-trusting host name verifier
+	        HostnameVerifier allHostsValid = new HostnameVerifier() {
+	            public boolean verify(String hostname, SSLSession session) { return true; }
+	        };
+	        // Install the all-trusting host verifier
+	        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+	        /* End of the fix*/
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Error: Trust All SSL Failed!");
 		}
 	}
 
