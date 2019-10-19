@@ -140,7 +140,6 @@ public abstract class TransitDatabaseBuilder extends Observable{
 	
 	public final FileOutputStream writeDownloaded(String fileName) {
 		if (downloadedKey == null) {
-			System.out.println("No key");
 			generateDownloadedKey();
 		}
 		
