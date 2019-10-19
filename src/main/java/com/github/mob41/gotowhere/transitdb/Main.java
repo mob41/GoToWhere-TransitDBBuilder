@@ -75,7 +75,7 @@ public class Main {
 				TransitDatabaseBuilder builder = null;
 				if (index == -1) {
 					for (int i = 0; i < builders.length; i++) {
-						if (builders[i].getProviderName().equals(builderName)) {
+						if (builderName.toLowerCase().equals(builders[i].getProviderName().toLowerCase())) {
 							builder = builders[i];
 							break;
 						}
