@@ -150,6 +150,7 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 		    				stopIds.add(routeStops[k].stop);
 		    			}
 		    		}
+		    		paths[j] = path;
 		    	}
 		    	
 		    	addRoute(new TransitRoute(
@@ -194,9 +195,8 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 		    		stop.lng == null || 
 		    		stop.name_sc == null || 
 		    		stop.data_timestamp == null) {
-				reportMessage("Error!");
-		    	Console.println("Error: Could not fetch stop " + stopId + " data! Aborting");
-		    	return false;
+		    	Console.println("Warning: Could not fetch stop " + stopId + " data!");
+		    	continue;
 		    }
 		    
 		    fileOut = writeDownloaded(fileKey);
@@ -207,7 +207,16 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 			fileOut.close();
 		    
 		    stopNameKey = new StopNameKey(stop.name_en);
+		    stopNameKey.setLocale("en", stop.name_en);
+		    stopNameKey.setLocale("zh", stop.name_tc);
+		    stopNameKey.setLocale("zh-hk", stop.name_tc);
+		    stopNameKey.setLocale("zh-cn", stop.name_sc);
+		    
 		    addrKey = new AddressKey(stop.name_en);
+		    addrKey.setLocale("en", stop.name_en);
+		    addrKey.setLocale("zh", stop.name_tc);
+		    addrKey.setLocale("zh-hk", stop.name_tc);
+		    addrKey.setLocale("zh-cn", stop.name_sc);
 		    
 		    addStop(new TransitStop(
 		    		TransitType.TRANSIT_BUS,
