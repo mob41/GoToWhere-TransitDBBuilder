@@ -149,7 +149,7 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 		    		routeStops = bounds.get(j);
 		    		path = new String[routeStops.length];
 		    		for (int k = 0; k < routeStops.length; k++) {
-		    			path[j] = routeStops[k].stop;
+		    			path[k] = routeStops[k].stop;
 		    			if (!stopIds.contains(routeStops[k].stop)) {
 		    				stopIds.add(routeStops[k].stop);
 		    			}
