@@ -92,12 +92,14 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 		    	return false;
 		    }
 		    
-		    fileOut = writeDownloaded(fileKey);
-			fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
-			fileWriter.println(gson.toJson(routeResp));
-			fileWriter.flush();
-			fileWriter.close();
-			fileOut.close();
+		    if (fileIn == null) {
+			    fileOut = writeDownloaded(fileKey);
+				fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
+				fileWriter.println(gson.toJson(routeResp));
+				fileWriter.flush();
+				fileWriter.close();
+				fileOut.close();
+		    }
 		    
 		    for (int i = 0; i < routes.length; i++) {
 		    	route = routes[i];
@@ -130,12 +132,14 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 				    	continue;
 				    }
 				    
-				    fileOut = writeDownloaded(fileKey);
-					fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
-					fileWriter.println(gson.toJson(routeStopResp));
-					fileWriter.flush();
-					fileWriter.close();
-					fileOut.close();
+				    if (fileIn == null) {
+					    fileOut = writeDownloaded(fileKey);
+						fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
+						fileWriter.println(gson.toJson(routeStopResp));
+						fileWriter.flush();
+						fileWriter.close();
+						fileOut.close();
+				    }
 				    
 				    bounds.add(routeStopResp.data);
 		    	}
@@ -199,12 +203,14 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 		    	continue;
 		    }
 		    
-		    fileOut = writeDownloaded(fileKey);
-			fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
-			fileWriter.println(gson.toJson(stopResp));
-			fileWriter.flush();
-			fileWriter.close();
-			fileOut.close();
+		    if (fileIn == null) {
+			    fileOut = writeDownloaded(fileKey);
+				fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
+				fileWriter.println(gson.toJson(stopResp));
+				fileWriter.flush();
+				fileWriter.close();
+				fileOut.close();
+		    }
 		    
 		    stopNameKey = new StopNameKey(stop.name_en);
 		    stopNameKey.setLocale("en", stop.name_en);

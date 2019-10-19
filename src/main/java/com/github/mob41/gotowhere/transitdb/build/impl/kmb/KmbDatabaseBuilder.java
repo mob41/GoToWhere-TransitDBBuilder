@@ -78,12 +78,14 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 		    	return false;
 		    }
 		    
-		    fileOut = writeDownloaded(fileKey);
-			fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
-			fileWriter.println(gson.toJson(raw));
-			fileWriter.flush();
-			fileWriter.close();
-			fileOut.close();
+		    if (fileIn == null) {
+			    fileOut = writeDownloaded(fileKey);
+				fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
+				fileWriter.println(gson.toJson(raw));
+				fileWriter.flush();
+				fileWriter.close();
+				fileOut.close();
+		    }
 		    
 		    routes = rno.split(",");
 	    } catch (Exception e){
@@ -202,12 +204,14 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 		    	return null;
 		    }
 		    
-		    FileOutputStream fileOut = writeDownloaded(fileKey);
-			PrintWriter fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
-			fileWriter.println(data);
-			fileWriter.flush();
-			fileWriter.close();
-			fileOut.close();
+		    if (fileIn == null) {
+			    FileOutputStream fileOut = writeDownloaded(fileKey);
+				PrintWriter fileWriter = new PrintWriter(new OutputStreamWriter(fileOut, StandardCharsets.UTF_8));
+				fileWriter.println(data);
+				fileWriter.flush();
+				fileWriter.close();
+				fileOut.close();
+		    }
 		    
 		    return gson.fromJson(newData, KmbStop[].class);
 		} catch (Exception e){
