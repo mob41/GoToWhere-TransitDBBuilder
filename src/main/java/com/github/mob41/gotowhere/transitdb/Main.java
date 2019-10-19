@@ -143,7 +143,8 @@ public class Main {
 			    	}
 			    	
 			    	if (inputIndex == 0) {
-			    		System.out.println("\nA new copy of the data will be downloaded.");
+			    		builder.generateDownloadedKey();
+			    		System.out.println("\nA new copy of the data will be downloaded.\n");
 			    	} else {
 			    		DownloadedInfo info = infos[inputIndex - 1];
 			    		builder.setDownloadedKey(info.getDownloadedKey());
