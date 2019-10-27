@@ -230,7 +230,7 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 		    
 		    addStop(new TransitStop(
 		    		TransitType.BUS,
-		    		"NWFB", //We put it in NWFB's db only, and put nothing in CTB to prevent duplication
+		    		"CTBNWFB",
 		    		stop.stop,
 		    		stopNameKey,
 		    		addrKey,
