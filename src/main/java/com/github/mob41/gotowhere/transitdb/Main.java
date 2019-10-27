@@ -8,7 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
@@ -27,6 +29,7 @@ import org.apache.commons.codec.binary.Base64;
 import com.github.mob41.gotowhere.transitdb.build.DownloadedInfo;
 import com.github.mob41.gotowhere.transitdb.build.TransitDatabaseBuilder;
 import com.github.mob41.gotowhere.transitdb.build.impl.ctbnwfb.CtbNwfbDatabaseBuilder;
+import com.github.mob41.gotowhere.transitdb.build.impl.hktransit.HkTransitDatabaseBuilder;
 import com.github.mob41.gotowhere.transitdb.build.impl.kmb.KmbDatabaseBuilder;
 import com.github.mob41.gotowhere.transitdb.db.TransitDatabase;
 
@@ -36,17 +39,24 @@ public class Main {
 
 	public static void main(String[] args) {
 		//Put implementation instances here
-		TransitDatabaseBuilder[] builders = {
-			new KmbDatabaseBuilder(),
-			new CtbNwfbDatabaseBuilder()
-		};
+		List<TransitDatabaseBuilder> builders = new ArrayList<TransitDatabaseBuilder>();
+		
+		builders.add(new KmbDatabaseBuilder());
+		builders.add(new CtbNwfbDatabaseBuilder());
+		
+		try {
+			builders.addAll(HkTransitDatabaseBuilder.getHkTransitBuilders());
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Could not include HkTransit builders. Please make sure you have connected to the internet properly.\n");
+		}
 		
 		System.out.println("GoToWhere TransitDBBuilder v" + VERSION);
 		System.out.println("Licensed under MIT License." + "\n");
 		
 		System.out.println("All fetched data and generated databases are copyrighted to their respective owners.\n");
 		
-		System.out.println("There are total of " + builders.length + " builders available.");
+		System.out.println("There are total of " + builders.size() + " builders available.");
 		System.out.println("Type \"list\" to show all of the available DB builders.");
 		System.out.println("Type \"exit\" to terminate the application.\n");
 		
@@ -73,9 +83,9 @@ public class Main {
 				System.out.println("\texit - Terminates the application.\n");
 				System.out.println("<>: Required []: Optional |: Or {}: Replace with input");
 			} else if (input.startsWith("list")) {
-				System.out.println("Listing " + builders.length + " available builders:");
-				for (int i = 0; i < builders.length; i++) {
-					System.out.println((i + 1) + ": " + builders[i].getProviderName());
+				System.out.println("Listing " + builders.size() + " available builders:");
+				for (int i = 0; i < builders.size(); i++) {
+					System.out.println((i + 1) + ": " + builders.get(i).getBuilderName());
 				}
 			} else if (input.startsWith("build")) {
 				String[] splits = input.split(" ");
@@ -94,14 +104,14 @@ public class Main {
 				
 				TransitDatabaseBuilder builder = null;
 				if (index == -1) {
-					for (int i = 0; i < builders.length; i++) {
-						if (builderName.toLowerCase().equals(builders[i].getProviderName().toLowerCase())) {
-							builder = builders[i];
+					for (int i = 0; i < builders.size(); i++) {
+						if (builderName.toLowerCase().equals(builders.get(i).getBuilderName().toLowerCase())) {
+							builder = builders.get(i);
 							break;
 						}
 					}
 				} else {
-					builder = builders[index - 1];
+					builder = builders.get(index - 1);
 				}
 				
 				if (builder == null) {
@@ -196,7 +206,7 @@ public class Main {
 					if (splits.length >= 4) {
 						fileName = splits[3];
 					} else {
-						fileName = builder.getProviderName() + "-" + System.currentTimeMillis();
+						fileName = builder.getBuilderName();// + "-" + System.currentTimeMillis();
 					}
 					
 					if (encodeBase64) {

@@ -51,7 +51,7 @@ public class TransitStop{
 	
 	public Map<String, Object> getMap(){
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("transit", transitType.toString());
+		map.put("type", transitType.toString());
 		map.put("provider", providerName);
 		map.put("stopId", stopId);
 		map.putAll(stopName.getMap());

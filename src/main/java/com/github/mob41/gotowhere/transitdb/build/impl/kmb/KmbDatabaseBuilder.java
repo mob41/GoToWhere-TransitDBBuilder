@@ -16,6 +16,7 @@ import java.util.List;
 import com.github.mob41.gotowhere.transitdb.Console;
 import com.github.mob41.gotowhere.transitdb.build.TransitDatabaseBuilder;
 import com.github.mob41.gotowhere.transitdb.db.AddressKey;
+import com.github.mob41.gotowhere.transitdb.db.RouteNameKey;
 import com.github.mob41.gotowhere.transitdb.db.StopNameKey;
 import com.github.mob41.gotowhere.transitdb.db.TransitRoute;
 import com.github.mob41.gotowhere.transitdb.db.TransitStop;
@@ -33,7 +34,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	private int reqCount;
 
 	public KmbDatabaseBuilder() {
-		super(TransitType.TRANSIT_BUS, "KMB");
+		super(TransitType.BUS, "KMB", "KMB");
 		gson = new Gson();
 	}
 
@@ -151,7 +152,7 @@ public class KmbDatabaseBuilder extends TransitDatabaseBuilder {
 	    		paths[j] = bounds.get(j);
 	    	}
 	    	
-	    	addRoute(new TransitRoute(transitType, providerName, routes[i], paths));
+	    	addRoute(new TransitRoute(transitType, providerName, routes[i], new RouteNameKey(routes[i]), paths, new String[] {"KMB"}));
 	    	reportProgress((int) ((i + 1) / (float) routes.length * 100.0));
 	    }
     	reportMessage("Done!");

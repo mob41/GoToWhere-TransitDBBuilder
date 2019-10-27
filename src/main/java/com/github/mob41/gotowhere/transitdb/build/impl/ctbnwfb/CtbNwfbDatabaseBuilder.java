@@ -17,6 +17,7 @@ import java.util.List;
 import com.github.mob41.gotowhere.transitdb.Console;
 import com.github.mob41.gotowhere.transitdb.build.TransitDatabaseBuilder;
 import com.github.mob41.gotowhere.transitdb.db.AddressKey;
+import com.github.mob41.gotowhere.transitdb.db.RouteNameKey;
 import com.github.mob41.gotowhere.transitdb.db.StopNameKey;
 import com.github.mob41.gotowhere.transitdb.db.TransitRoute;
 import com.github.mob41.gotowhere.transitdb.db.TransitStop;
@@ -38,7 +39,7 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 	private final Gson gson;
 	
 	public CtbNwfbDatabaseBuilder() {
-		super(TransitType.TRANSIT_BUS, "CTBNWFB");
+		super(TransitType.BUS, "CTBNWFB", "CTBNWFB");
 		gson = new Gson();
 	}
 
@@ -158,10 +159,13 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 		    	}
 		    	
 		    	addRoute(new TransitRoute(
-		    			TransitType.TRANSIT_BUS,
+		    			TransitType.BUS,
 		    			company,
 		    			route.route,
-		    			paths));
+		    			new RouteNameKey(route.route),
+		    			paths,
+		    			new String[] {"CTBNWFB"}
+		    			));
 		    	reportProgress((int) ((i + 1) / (float) routes.length * 100.0 / 3.0 + (x * 100.0 / 3.0)));
 		    }
 		}
@@ -225,7 +229,7 @@ public class CtbNwfbDatabaseBuilder extends TransitDatabaseBuilder {
 		    addrKey.setLocale("zh-cn", stop.name_sc);
 		    
 		    addStop(new TransitStop(
-		    		TransitType.TRANSIT_BUS,
+		    		TransitType.BUS,
 		    		"NWFB", //We put it in NWFB's db only, and put nothing in CTB to prevent duplication
 		    		stop.stop,
 		    		stopNameKey,

@@ -23,6 +23,8 @@ public abstract class TransitDatabaseBuilder extends Observable{
 	
 	public final String providerName;
 	
+	private final String builderName;
+	
 	private final List<TransitRoute> routes;
 	
 	private final List<TransitStop> stops;
@@ -33,14 +35,18 @@ public abstract class TransitDatabaseBuilder extends Observable{
 	
 	private String downloadedKey;
 	
-	public TransitDatabaseBuilder(TransitType transitType, String providerName) {
+	private String sharedDownloadedKey;
+	
+	public TransitDatabaseBuilder(TransitType transitType, String providerName, String builderName) {
 		this.transitType = transitType;
 		this.providerName = providerName;
+		this.builderName = builderName;
 		routes = new ArrayList<TransitRoute>();
 		stops = new ArrayList<TransitStop>();
 		progress = 0;
 		msg = null;
 		downloadedKey = null;
+		sharedDownloadedKey = builderName;
 	}
 	
 	public final void cleanUp() {
@@ -91,7 +97,7 @@ public abstract class TransitDatabaseBuilder extends Observable{
 	}
 	
 	public final void generateDownloadedKey() {
-		downloadedKey = PRE_KEY + providerName + "-" + System.currentTimeMillis();
+		downloadedKey = PRE_KEY + sharedDownloadedKey + "-" + System.currentTimeMillis();
 	}
 	
 	public final DownloadedInfo[] getAvailableDownloaded() {
@@ -116,7 +122,7 @@ public abstract class TransitDatabaseBuilder extends Observable{
 	    		continue;
 	    	}
 	    	
-	    	if (!split[2].equals(providerName)) {
+	    	if (!split[2].equals(sharedDownloadedKey)) {
 	    		continue;
 	    	}
 	    	
@@ -136,6 +142,14 @@ public abstract class TransitDatabaseBuilder extends Observable{
 	
 	public final String getDownloadedKey() {
 		return downloadedKey;
+	}
+	
+	public final void setSharedDownloadedKey(String sharedDownloadedKey) {
+		this.sharedDownloadedKey = sharedDownloadedKey;
+	}
+	
+	public final String getSharedDownloadedKey() {
+		return sharedDownloadedKey;
 	}
 	
 	public final FileOutputStream writeDownloaded(String fileName) {
@@ -169,7 +183,6 @@ public abstract class TransitDatabaseBuilder extends Observable{
 	
 	public final FileInputStream readDownloaded(String fileName) {
 		if (downloadedKey == null) {
-			System.out.println("No key");
 			generateDownloadedKey();
 		}
 		
@@ -208,6 +221,10 @@ public abstract class TransitDatabaseBuilder extends Observable{
 		
 		TransitDatabase inst = new TransitDatabase(transitType, providerName, generateVersion(currentTimeMs, outRoutes, outStops), currentTimeMs, outRoutes, outStops);
 		return inst;
+	}
+
+	public String getBuilderName() {
+		return builderName;
 	}
 	
 }
