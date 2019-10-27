@@ -76,6 +76,37 @@ public class TransitDatabase {
 		return map;
 	}
 	
+	public Map<String, Object> getRoutesMap(){
+		List<Map<String, Object>> routeMaps = new ArrayList<Map<String, Object>>();
+		for (int i = 0; i < routes.length; i++) {
+			routeMaps.add(routes[i].getMap());
+		}
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("type", transitType.toString());
+		map.put("provider", providerName);
+		map.put("generated", generated);
+		map.put("version", version);
+		map.put("routes", routeMaps);
+		return map;
+	}
+	
+	public Map<String, Object> getStopsMap(){
+		List<Map<String, Object>> stopMaps = new ArrayList<Map<String, Object>>();
+		for (int i = 0; i < stops.length; i++) {
+			stopMaps.add(stops[i].getMap());
+		}
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("type", transitType.toString());
+		map.put("provider", providerName);
+		map.put("generated", generated);
+		map.put("version", version);
+		map.put("stops", stopMaps);
+		return map;
+	}
+	
+	
 	public Map<String, Object> getVersionMap(){
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("transit", transitType.toString());
@@ -88,6 +119,18 @@ public class TransitDatabase {
 	public String getDatabaseJson() {
 		Gson gson = new Gson();
 		Map<String, Object> map = getDatabaseMap();
+		return gson.toJson(map);
+	}
+	
+	public String getRoutesJson() {
+		Gson gson = new Gson();
+		Map<String, Object> map = getRoutesMap();
+		return gson.toJson(map);
+	}
+	
+	public String getStopsJson() {
+		Gson gson = new Gson();
+		Map<String, Object> map = getStopsMap();
 		return gson.toJson(map);
 	}
 	

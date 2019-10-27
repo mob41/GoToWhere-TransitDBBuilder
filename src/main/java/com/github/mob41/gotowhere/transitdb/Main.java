@@ -188,6 +188,12 @@ public class Main {
 					System.out.print("Generating Database JSON... ");
 					String dbJson = db.getDatabaseJson();
 					System.out.println("done");
+					System.out.print("Generating Routes JSON... ");
+					String routesJson = db.getRoutesJson();
+					System.out.println("done");
+					System.out.print("Generating Stops JSON... ");
+					String stopsJson = db.getStopsJson();
+					System.out.println("done");
 					System.out.print("Generating Version JSON... ");
 					String verJson = db.getVersionJson();
 					System.out.println("done");
@@ -198,8 +204,28 @@ public class Main {
 						output = Base64.encodeBase64String(dbJson.getBytes(StandardCharsets.UTF_8));
 						System.out.println("done");
 					} else {
-						System.out.println("Keeping it as JSON format.");
+						System.out.println("Keeping database as JSON format.");
 						output = dbJson;
+					}
+					
+					String routesOutput;
+					if (encodeBase64) {
+						System.out.print("Encoding routes JSON in Base64... ");
+						routesOutput = Base64.encodeBase64String(routesJson.getBytes(StandardCharsets.UTF_8));
+						System.out.println("done");
+					} else {
+						System.out.println("Keeping routes as JSON format.");
+						routesOutput = routesJson;
+					}
+					
+					String stopsOutput;
+					if (encodeBase64) {
+						System.out.print("Encoding stops JSON in Base64... ");
+						stopsOutput = Base64.encodeBase64String(stopsJson.getBytes(StandardCharsets.UTF_8));
+						System.out.println("done");
+					} else {
+						System.out.println("Keeping stops as JSON format.");
+						stopsOutput = stopsJson;
 					}
 					
 					String fileName;
@@ -221,6 +247,8 @@ public class Main {
 					
 					int dotIndex = fileName.lastIndexOf('.');
 					String versionFileName = fileName.substring(0, dotIndex) + "-version.json";
+					String routesFileName = fileName.substring(0, dotIndex) + "-routes.json";
+					String stopsFileName = fileName.substring(0, dotIndex) + "-stops.json";
 
 					System.out.print("Outputting database file as \"" + fileName + "\"... ");
 					try {
@@ -235,6 +263,52 @@ public class Main {
 						FileOutputStream out = new FileOutputStream(file);
 						PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
 						writer.println(output);
+						writer.flush();
+						writer.close();
+						out.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.err.println("Error: Error occurred. Aborting current operation");
+						continue;
+					}
+					System.out.println("done");
+					
+					System.out.print("Outputting routes file as \"" + routesFileName + "\"... ");
+					try {
+						File file = new File(routesFileName);
+						if (file.exists()) {
+							file.delete();
+						}
+						if (!file.exists()) {
+							file.createNewFile();
+						}
+						
+						FileOutputStream out = new FileOutputStream(file);
+						PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+						writer.println(routesOutput);
+						writer.flush();
+						writer.close();
+						out.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.err.println("Error: Error occurred. Aborting current operation");
+						continue;
+					}
+					System.out.println("done");
+					
+					System.out.print("Outputting stops file as \"" + stopsFileName + "\"... ");
+					try {
+						File file = new File(stopsFileName);
+						if (file.exists()) {
+							file.delete();
+						}
+						if (!file.exists()) {
+							file.createNewFile();
+						}
+						
+						FileOutputStream out = new FileOutputStream(file);
+						PrintWriter writer = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+						writer.println(stopsOutput);
 						writer.flush();
 						writer.close();
 						out.close();
